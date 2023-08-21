@@ -1,3 +1,4 @@
+# scrape data without opening browser
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -11,12 +12,14 @@ url_link = "https://www.themoviedb.org/"
 
 class HeadLess:
     def __init__(self):
+        user_agent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1"
+
         headers = {
-            "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1",
+            "User-Agent": f"{user_agent}",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.5",
         }
-        user_agent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1"
+
         self.options = webdriver.ChromeOptions()
         self.options.headless = True
         self.options.add_argument(f"user-agent={user_agent}")
@@ -41,6 +44,8 @@ class HeadLess:
         movies_list = []
 
         for card in cards:
+            if len(movies_list) >= 3:
+                break
             # for images
             images = card.find_element(By.XPATH, ".//img[@class='poster']")
             image_url = images.get_attribute('src')
@@ -65,15 +70,15 @@ class HeadLess:
             # for headings
             headings = card.find_element(By.XPATH, ".//h2")
             headings_text = headings.find_element(By.CSS_SELECTOR, "a")
-            print(headings_text)
+            print(headings_text.text)
 
             # for dates
             find_dates = card.find_element(By.XPATH, ".//div[@class='content']")
             movie_dates = find_dates.find_element(By.TAG_NAME, "p")
-            print(movie_dates)
+            print(movie_dates.text)
 
             # appending all files
-            movies_list.append(f"{headings_text.text}, {image_url}, {movie_dates.text}")
+            movies_list.append(f"{headings_text.text}, {save_image_path}, {movie_dates.text}")
 
         if len(movies_list) > 0:
             if not os.path.isdir('movies data'):
